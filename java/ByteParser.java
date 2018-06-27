@@ -9,6 +9,10 @@ import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.Calendar;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
+import java.util.Set;
+import java.util.HashSet;
 
 // MP4
 class Atom {
@@ -76,6 +80,38 @@ class Atom {
     }
 }
 
+class MP4FileList {
+    private ArrayList<File> listFiles = null;
+
+    MP4FileList() {
+
+        String currentPath = System.getProperty("user.dir") + File.separator;
+        File f = new File(currentPath);
+
+        if (f != null && f.exists()) {
+            File[] paths = null;
+
+            paths = f.listFiles();
+
+            for (File path : paths) {
+                Pattern pattern = Pattern.compile("[a-zA-Z0-9_-]+.mp4");
+                Matcher matcher = pattern.matcher(path.toString());
+
+                if (matcher != null && matcher.find()) {
+                    if (listFiles == null)
+                        listFiles =  new ArrayList<File>();
+
+                    listFiles.add(path);
+                }
+            }
+        }
+    }
+
+    public ArrayList<File> getList() {
+        return listFiles;
+    }
+}
+
 
 class ByteParser {
     private ArrayList<Atom> AtomList = null;
@@ -84,19 +120,39 @@ class ByteParser {
     private static final int SIZE_64BITS_LEN = 8;
     private static final int ATOM_LABEL_LEN = 4;
 
+    private static final String FILE_LEVEL = "root";
+
     // Spherical video V1 atom identifiers
     private static final String FTYP = "ftyp";
     private static final String MOOV = "moov";
+
+    // moov childs
     private static final String TRAK = "trak";
+    private static final String MVHD = "mvhd";
+    private static final String IODS = "iods";
+
     private static final String UUID = "uuid";
 
+
     // UUID value ffcc8263-f855-4a93-8814-587a02521fdd
+    private static final int UUID_LEN = 16; // 16 bytes
     private static final String UUID_SPHERICAL = "ffcc8263f8554a938814587a02521fdd";
 
-
     // Spherical video v2 atom identifiers
+    // trak childs
+    private static final String TKHD = "tkhd";
+    private static final String EDTS = "edts";
     private static final String MDIA = "mdia";
+
+
+    // edts child
+    private static final String ELST = "elst";
+
+    // mdia child
+    private static final String MDHD = "mdhd";
+    private static final String HDLR = "hdlr";
     private static final String MINF = "minf";
+
     private static final String STBL = "stbl";
     private static final String STSD = "stsd";
     private static final String AVC1 = "avc1";
@@ -109,6 +165,10 @@ class ByteParser {
 
     // Media data box
     private static final String MDAT = "mdat";
+
+    private static final Set<String> childAtomsMOOV = new HashSet<String>(Arrays.asList(TRAK, MVHD, IODS));
+    private static final Set<String> childAtomsTRAK = new HashSet<String>(Arrays.asList(TKHD, EDTS, MDIA));
+    private static final Set<String> childAtomsMDIA = new HashSet<String>(Arrays.asList(MDHD, MINF, HDLR));
 
     private static int getInteger(byte[] bytes) {
         int temp = -1;
@@ -153,23 +213,177 @@ class ByteParser {
     public static int matchAtomName(String name) {
         switch (name) {
         case FTYP:
+        case MOOV:
+        case MDAT:
             return 0;
 
-        case MOOV:
+        case TRAK:
+        case MVHD:
             return 1;
 
-        case TRAK:
+        case TKHD:
+        case EDTS:
+        case MDIA:
             return 2;
 
-        case UUID:
+        case MDHD:
+        case MINF:
+        case HDLR:
             return 3;
 
-        case MDAT:
-            return 4;
+        case UUID:   // can be in any level
+            return 99;
 
         default:
             return -1;
         }
+    }
+
+
+    public static void parseUUID(RandomAccessFile randomAccess, long startOffset, long length) {
+
+        long count = 0;
+
+        System.out.println("length: " + length);
+
+        try {
+            long fptr = randomAccess.getFilePointer();
+            byte[] bytes = new byte[UUID_LEN];
+            randomAccess.readFully(bytes);
+
+            String uuid = getString(bytes);
+
+            if (uuid.equals(UUID_SPHERICAL)) {
+                System.out.println("Atom: " + uuid + " at offset : " + fptr + " , Size : " + length);
+            }
+
+            randomAccess.seek(startOffset + length);
+        } catch (IOException ex) {
+            System.out.println(ex.getMessage());
+        }
+    }
+
+
+    public static void parseMdia(RandomAccessFile randomAccess, long startOffset, long length) {
+        // look for trak
+
+        long count = 0;
+
+        System.out.println("length: " + length);
+
+        try {
+            do {
+                long fptr = randomAccess.getFilePointer();
+                int atomSize = randomAccess.readInt();
+                byte[] bytes = new byte[ATOM_LABEL_LEN];
+                randomAccess.readFully(bytes);
+
+                String strAtom = getString(bytes);
+                System.out.println("Atom: " + strAtom + " at offset : " + fptr + " , Size : " + atomSize);
+
+                count += atomSize;
+
+                if (strAtom.equals(MINF) || strAtom.equals(STBL)) {
+                    parseMdia(randomAccess, fptr, atomSize);
+                }
+
+                randomAccess.seek(fptr + atomSize);
+            } while (count < (length - SIZE_LEN - ATOM_LABEL_LEN));
+            // At the end of parsing, set randomAccessFile to end of the section.
+            randomAccess.seek(startOffset + length);
+        } catch (IOException ex) {
+            System.out.println(ex.getMessage());
+        }
+    }
+
+    public static void parseTrak(RandomAccessFile randomAccess, long startOffset, long length) {
+        // look for trak
+
+        long count = 0;
+
+        System.out.println("trak length: " + length);
+
+        try {
+            do {
+                long fptr = randomAccess.getFilePointer();
+                int atomSize = randomAccess.readInt();
+                byte[] bytes = new byte[ATOM_LABEL_LEN];
+                randomAccess.readFully(bytes);
+
+                String strAtom = getString(bytes);
+                System.out.println("Atom: " + strAtom + " at offset : " + fptr + " , Size : " + atomSize);
+
+                count += atomSize;
+
+                if (strAtom.equals(MDIA)) {
+                    parseMdia(randomAccess, fptr, atomSize);
+                } else if (strAtom.equals(UUID)) {
+                    parseUUID(randomAccess, fptr, atomSize);
+                }
+
+                randomAccess.seek(fptr + atomSize);
+            } while (count < (length - SIZE_LEN - ATOM_LABEL_LEN));
+            // At the end of parsing, set randomAccessFile to end of the section.
+            randomAccess.seek(startOffset + length);
+        } catch (IOException ex) {
+            System.out.println(ex.getMessage());
+        }
+
+        System.out.println();
+    }
+
+    public static void parse(RandomAccessFile randomAccess, long startOffset, long length) {
+        // look for trak
+
+        long count = 0;
+
+        System.out.println("moov length: " + length);
+
+        try {
+            do {
+                long fptr = randomAccess.getFilePointer();
+                int atomSize = randomAccess.readInt();
+                byte[] bytes = new byte[ATOM_LABEL_LEN];
+                randomAccess.readFully(bytes);
+
+                String strAtom = getString(bytes);
+                System.out.println("Atom: " + strAtom + " at offset : " + fptr + " , Size : " + atomSize);
+
+                if (strAtom.equals(TRAK) || strAtom.equals(MDIA) ||
+                    strAtom.equals(MINF) || strAtom.equals(STBL)) {
+                    parse(randomAccess, fptr, atomSize);
+                } else if (strAtom.equals(UUID)) {
+                    parseUUID(randomAccess, fptr, atomSize);
+                }
+
+                count += atomSize;
+                randomAccess.seek(fptr + atomSize);
+
+            } while (count < (length - SIZE_LEN - ATOM_LABEL_LEN));
+            // At the end of parsing, set randomAccessFile to end of the section.
+            randomAccess.seek(startOffset + length);
+        } catch (IOException ex) {
+            System.out.println(ex.getMessage());
+        }
+
+        System.out.println();
+    }
+
+    public static String getCurrentParent(String strAtomName) {
+        String id = null;
+
+        if (childAtomsMOOV != null && childAtomsMOOV.contains(strAtomName)) {
+            System.out.println("child: " + strAtomName + " parent: " + MOOV);
+            id = MOOV;
+        } else if (childAtomsTRAK != null && childAtomsTRAK.contains(strAtomName)) {
+            System.out.println("child: " + strAtomName + " parent: " + TRAK);
+            id = TRAK;
+        } else if (childAtomsMDIA != null && childAtomsMDIA.contains(strAtomName)) {
+            System.out.println("child: " + strAtomName + " parent: " + MDIA);
+            id = MDIA;
+        }
+
+        return id;
     }
 
     public static void main(String[] args) {
@@ -181,104 +395,121 @@ class ByteParser {
         // Scanner input = new Scanner(System.in);
         // String fileName = input.nextLine();
 
-        String fileName = "emergence.mp4";
         Calendar cal = Calendar.getInstance();
         long startTime = cal.getTimeInMillis();
 
-        filepath = currentPath + "\\" + fileName;
+        MP4FileList mp4Files = new MP4FileList();
+        ArrayList<File> fileList = mp4Files.getList();
 
-        File f = new File(filepath);
+        for (int file_idx = 0; file_idx < fileList.size(); file_idx++) {
 
-        System.out.println(f.getPath());
+            File f = fileList.get(file_idx);
 
-        if (f.exists()) {
+            if (f.exists()) {
 
-            long fileSize = f.length();
+                long fileSize = f.length();
+                System.out.println("File path: " + f.getPath());
 
-            try(RandomAccessFile randomAccess = new RandomAccessFile(f, "r")) {
+                try(RandomAccessFile randomAccess = new RandomAccessFile(f, "r")) {
 
-                try {
-                    long filePointer = randomAccess.getFilePointer();
+                    try {
+                        long filePointer = randomAccess.getFilePointer();
 
-                    byte[] bytes = new byte[SIZE_LEN];
+                        byte[] bytes = new byte[ATOM_LABEL_LEN];
 
-                    do {
+                        do {
+                            int count = 0;
+                            boolean skip = false;
 
-                        int count = 0;
-                        boolean skip = false;
+                            int atomSize = randomAccess.readInt();
+                            long atomSizeLong = -1;
 
-                        int atomSize = randomAccess.readInt();
-                        long atomSizeLong = -1;
+                            // System.out.println("Size in dec: " + atomSize);
+                            // System.out.println("Size in hex: " + Integer.toHexString(atomSize));
 
-                        // System.out.println("Size in dec: " + atomSize);
-                        // System.out.println("Size in hex: " + Integer.toHexString(atomSize));
+                            randomAccess.readFully(bytes);
 
-                        randomAccess.readFully(bytes);
+                            String strAtom = getString(bytes);
 
-                        String strAtom = getString(bytes);
+                            int matchLevel;
+                            if ((matchLevel = matchAtomName(strAtom)) != -1) {
 
-                        if (matchAtomName(strAtom) != -1) {
+                                if (strAtom.equalsIgnoreCase(MDAT) && atomSize == 1) {
+                                    // size will be after mdat
 
-                            if (strAtom.equalsIgnoreCase(MDAT) && atomSize == 1) {
-                                // size will be after mdat
+                                    atomSizeLong = randomAccess.readLong();
+                                    // System.out.println("AtomSizeLong in dec: " + atomSizeLong);
+                                    // System.out.println("AtomSizeLong in hex: " + Long.toHexString(atomSizeLong));
+                                    skip = true;
+                                }
 
-                                atomSizeLong = randomAccess.readLong();
-                                // System.out.println("AtomSizeLong in dec: " + atomSizeLong);
-                                // System.out.println("AtomSizeLong in hex: " + Long.toHexString(atomSizeLong));
-                                skip = true;
+                                Atom atom = null;
+                                if (skip && atomSizeLong != -1)
+                                    atom = new Atom(strAtom, atomSizeLong, filePointer);
+                                else
+                                    atom = new Atom(strAtom, atomSize, filePointer);
+
+                                if (matchLevel == 0) {
+                                    atom.setParent(FILE_LEVEL);
+
+                                    if (strAtom.equals(MOOV)) {
+                                        System.out.println("start parsing moov");
+
+                                        parse(randomAccess, filePointer, atomSize);
+                                    }
+                                } else
+                                    atom.setParent(getCurrentParent(strAtom));
+
+                                if (objByteParser.AtomList != null) {
+                                    objByteParser.AtomList.add(atom);
+                                } else {
+                                    objByteParser.AtomList = new ArrayList<Atom>();
+                                    objByteParser.AtomList.add(atom);
+                                }
                             }
 
-                            Atom atom = null;
+                            long newOffset;
+
                             if (skip && atomSizeLong != -1)
-                                atom = new Atom(strAtom, atomSizeLong, filePointer);
+                                newOffset = filePointer + atomSizeLong;
                             else
-                                atom = new Atom(strAtom, atomSize, filePointer);
+                                newOffset = filePointer + atomSize;
 
-                            if (objByteParser.AtomList != null) {
-                                objByteParser.AtomList.add(atom);
-                            } else {
-                                objByteParser.AtomList = new ArrayList<Atom>();
-                                objByteParser.AtomList.add(atom);
-                            }
-                        }
+                            // System.out.println("set filepointer to start reading at offset " + newOffset);
+                            randomAccess.seek(newOffset);
 
-                        long newOffset;
+                            filePointer = randomAccess.getFilePointer();
+                            // System.out.println("pos : " + filePointer);
 
-                        if (skip && atomSizeLong != -1)
-                            newOffset = filePointer + atomSizeLong;
-                        else
-                            newOffset =  filePointer + atomSize;
+                        } while (filePointer != fileSize);
 
-                        // System.out.println("set filepointer to start reading at offset " + newOffset);
-                        randomAccess.seek(newOffset);
-
-                        filePointer = randomAccess.getFilePointer();
-                        // System.out.println("pos : " + filePointer);
-
-                    } while (filePointer != fileSize);
-
-                    bytes = null;
-                } catch (EOFException ex) {
+                        bytes = null;
+                    } catch (EOFException ex) {
+                        System.out.println(ex.getMessage());
+                    } catch (IOException ex) {
+                        System.out.println(ex.getMessage());
+                    }
+                } catch (FileNotFoundException ex) {
                     System.out.println(ex.getMessage());
                 } catch (IOException ex) {
                     System.out.println(ex.getMessage());
                 }
-            } catch (FileNotFoundException ex) {
-                System.out.println(ex.getMessage());
-            } catch (IOException ex) {
-                System.out.println(ex.getMessage());
+
+                for (int idx = 0; idx < objByteParser.AtomList.size(); idx++) {
+                    Atom atom = objByteParser.AtomList.get(idx);
+                    if (atom != null)
+                        System.out.println("Atom name: " + atom.getName() + " starts at offset -> " + atom.getAtomOffset() + " , parent -> " + atom.getParentAtom());
+                }
+
+                objByteParser.AtomList = null;
+
+                System.out.println();
             }
-
-            for (int idx = 0; idx < objByteParser.AtomList.size(); idx++) {
-                Atom atom = objByteParser.AtomList.get(idx);
-                if (atom != null)
-                    System.out.println("Atom name: " + atom.getName() + " starts at offset -> " + atom.getAtomOffset());
-            }
-            cal = Calendar.getInstance();
-            long endTime = cal.getTimeInMillis();
-
-            System.out.println("Millis took to parse --> " + (endTime - startTime) + " msecs");
-
         }
+
+        cal = Calendar.getInstance();
+        long endTime = cal.getTimeInMillis();
+
+        System.out.println("Millis took to parse --> " + (endTime - startTime) + " msecs");
     }
 }
