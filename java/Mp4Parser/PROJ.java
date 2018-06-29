@@ -31,12 +31,17 @@ public class PROJ extends Atom {
 				for (int indent = 0; indent < this.level + 1; indent++)
 					printMsg += " -> ";
 
-				printMsg += "(" + strChildAtom + ") => " + childAtomSize + " bytes,  Offset: " + fptr + ", Parent: " + Constants.SV3D;
+				printMsg += "(" + strChildAtom + ") => " + childAtomSize + " bytes,  Offset: " + fptr + ", Parent: " + Constants.PROJ;
 
 				System.out.println(printMsg);
 
-				if (strChildAtom.equals(Constants.PRHD) || strChildAtom.equals(Constants.EQUI) ||
-				    strChildAtom.equals(Constants.CBMP)) {
+				if (strChildAtom.equals(Constants.PRHD)) {
+					PRHD prhd = new PRHD(mRandomAccess, fptr, childAtomSize, Constants.PRHD, level + 1);
+					prhd.parse();
+				} else if (strChildAtom.equals(Constants.EQUI)) {
+					EQUI equi = new EQUI(mRandomAccess, fptr, childAtomSize, Constants.EQUI, level + 1);
+					equi.parse();
+				} else if (strChildAtom.equals(Constants.CBMP)) {
 
 				}
 
