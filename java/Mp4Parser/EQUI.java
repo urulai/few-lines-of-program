@@ -29,6 +29,13 @@ public class EQUI extends Atom {
             projectionBoundsRight  = (double) mRandomAccess.readInt() / Math.pow(2, 32);
 
             mRandomAccess.seek(startOffset + length);
+
+            AtomList atomList = AtomList.getInstance();
+            if (atomList != null)
+                atomList.insert((Atom)this);
+            else {
+                System.out.println("empty");
+            }
         } catch (IOException ex) {
             //System.out.println(ex.getMessage());
         }

@@ -28,19 +28,19 @@ public class Atom {
         return name;
     }
 
-    public String getparent() {
+    public String getParent() {
         return parent;
     }
 
-    public int getlevel() {
+    public int getLevel() {
         return level;
     }
 
-    public long getlength() {
+    public long getLength() {
         return length;
     }
 
-    public long getstartOffset() {
+    public long getStartOffset() {
         return startOffset;
     }
 
@@ -60,7 +60,7 @@ public class Atom {
         parent = parent;
     }
 
-    public void setstartOffset(Long offset) {
+    public void setStartOffset(Long offset) {
         startOffset = offset;
     }
 

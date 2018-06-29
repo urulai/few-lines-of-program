@@ -36,10 +36,10 @@ public class PROJ extends Atom {
 				System.out.println(printMsg);
 
 				if (strChildAtom.equals(Constants.PRHD)) {
-					PRHD prhd = new PRHD(mRandomAccess, fptr, childAtomSize, Constants.PRHD, level + 1);
+					PRHD prhd = new PRHD(mRandomAccess, fptr, childAtomSize, Constants.PROJ, level + 1);
 					prhd.parse();
 				} else if (strChildAtom.equals(Constants.EQUI)) {
-					EQUI equi = new EQUI(mRandomAccess, fptr, childAtomSize, Constants.EQUI, level + 1);
+					EQUI equi = new EQUI(mRandomAccess, fptr, childAtomSize, Constants.PROJ, level + 1);
 					equi.parse();
 				} else if (strChildAtom.equals(Constants.CBMP)) {
 

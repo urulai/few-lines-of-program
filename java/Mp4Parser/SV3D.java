@@ -38,7 +38,7 @@ public class SV3D extends Atom {
 				if (strChildAtom.equals(Constants.SVHD)) {
 
 				} else if (strChildAtom.equals(Constants.PROJ)) {
-					PROJ proj = new PROJ(mRandomAccess, fptr, childAtomSize, Constants.PROJ, level + 1);
+					PROJ proj = new PROJ(mRandomAccess, fptr, childAtomSize, Constants.SV3D, level + 1);
 					proj.parse();
 				}
 

@@ -39,6 +39,10 @@ public class UUID extends Atom {
             }
 
             mRandomAccess.seek(startOffset + length);
+
+            AtomList atomList = AtomList.getInstance();
+            if(atomList != null)
+                atomList.insert((Atom)this);
         } catch (IOException ex) {
             //System.out.println(ex.getMessage());
         }

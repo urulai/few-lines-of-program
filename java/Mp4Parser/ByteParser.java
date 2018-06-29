@@ -13,8 +13,6 @@ import java.util.HashSet;
 
 class ByteParser {
 
-    private ArrayList<Atom> AtomList = null;
-
     public static void parse(RandomAccessFile randomAccess, String atomName, long startOffset, long length) {
 
         long count = 0;
@@ -43,7 +41,7 @@ class ByteParser {
                 } else if (strAtom.equals(Constants.UUID)) {
                     UUID uuid = new UUID(randomAccess, fptr, atomSize, atomName, level);
                     uuid.parse();
-                } else if(strAtom.equals(Constants.STSD)) {
+                } else if (strAtom.equals(Constants.STSD)) {
                     STSD stsd = new STSD(randomAccess, fptr, atomSize, atomName, level);
                     stsd.parse();
                 }
@@ -195,5 +193,10 @@ class ByteParser {
         long endTime = cal.getTimeInMillis();
 
         System.out.println("Millis took to parse ("  + fileList.size() +  ") files --> " + (endTime - startTime) + " msecs");
+
+        AtomList atomList = AtomList.getInstance();
+        if (atomList != null)
+            atomList.display();
+
     }
 }
