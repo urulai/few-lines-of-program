@@ -1,65 +1,68 @@
 // MP4
 public class Atom {
 
-    long atomSize;
-    long atomOffset; // form file start
-    String parentAtom;
-    String atomLevel;
-    String atomName;
+    long length;
+    long startOffset; // form file start
+    String parent;
+    int level;
+    String name;
+    byte[] data;
 
     Atom(String name) {
-        atomName = name;
+        this.name = name;
     }
 
     Atom(String name, long size, long offset) {
         this(name);
-        atomSize = size;
-        atomOffset = offset;
+        this.length = size;
+        this.startOffset = offset;
     }
 
-    Atom(String name, long size, long offset, String parent, String level) {
+    Atom(String name, long size, long offset, String parent, int level) {
         this(name, size, offset);
-        parentAtom = parent;
-        atomLevel = level;
+        this.parent = parent;
+        this.level = level;
     }
 
     public String getName() {
-        return atomName;
+        return name;
     }
 
-    public String getParentAtom() {
-        return parentAtom;
+    public String getparent() {
+        return parent;
     }
 
-    public String getAtomLevel() {
-        return atomLevel;
+    public int getlevel() {
+        return level;
     }
 
-    public long getAtomSize() {
-        return atomSize;
+    public long getlength() {
+        return length;
     }
 
-    public long getAtomOffset() {
-        return atomOffset;
+    public long getstartOffset() {
+        return startOffset;
     }
 
     public void setName(String name) {
-        atomName = name;
+        name = name;
     }
 
-    public void setAtomLevel(String level) {
-        atomLevel = level;
+    public void setlevel(int level) {
+        level = level;
     }
 
-    public void setAtomSize(int sz) {
-        atomSize = sz;
+    public void setlength(int sz) {
+        length = sz;
     }
 
     public void setParent(String parent) {
-        parentAtom = parent;
+        parent = parent;
     }
 
-    public void setAtomOffset(Long offset) {
-        atomOffset = offset;
+    public void setstartOffset(Long offset) {
+        startOffset = offset;
     }
+
+    public void parse() {}
 }
