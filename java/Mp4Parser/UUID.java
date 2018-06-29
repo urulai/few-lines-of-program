@@ -4,7 +4,7 @@ import java.io.IOException;
 public class UUID extends Atom {
 
     private RandomAccessFile mRandomAccess = null;
-    
+
     public UUID(RandomAccessFile randomAccess, long startOffset, long length, String parent, int level) {
         super(Constants.UUID, length, startOffset, parent, level);
 
@@ -13,8 +13,6 @@ public class UUID extends Atom {
 
     @Override
     public void parse() {
-        int count = 0;
-
         try {
             long fptr = mRandomAccess.getFilePointer();
             byte[] bytes = new byte[Constants.UUID_LEN];

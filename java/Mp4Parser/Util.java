@@ -1,6 +1,6 @@
 import java.io.UnsupportedEncodingException;
 
-public class Util {   
+public class Util {
 
     public static int getInteger(byte[] bytes) {
         int temp = -1;
@@ -31,16 +31,15 @@ public class Util {
 
     public static String getString(byte[] bytes) {
         String atom_label = null;
+
         try {
             atom_label = new String(bytes, "UTF-8");
-
         } catch (UnsupportedEncodingException ex) {
             System.out.println(ex.getMessage());
-
         } finally {
             return atom_label;
         }
-    }   
+    }
 
     public static int getAtomLevel(String name) {
         switch (name) {
@@ -88,7 +87,13 @@ public class Util {
         case Constants.H263:
         case Constants.MP3:
         case Constants.MP4A:
-        return 6;
+            return 6;
+
+        case Constants.AVCC:
+        case Constants.ST3D:
+        case Constants.SV3D:
+        case Constants.PASP:
+            return 7;
 
         case Constants.UUID:   // can be in any level
             return 99;

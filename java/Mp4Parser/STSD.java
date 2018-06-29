@@ -27,7 +27,7 @@ public class STSD extends Atom {
 			mRandomAccess.readFully(flags);
 
 			int numEntries = mRandomAccess.readInt();
-			System.out.println("Entries: " + numEntries);
+			// System.out.println("Entries: " + numEntries);
 
 			// Start reading child elements, if there are any
 			if (numEntries > 0) {
@@ -37,7 +37,6 @@ public class STSD extends Atom {
 					fptr = mRandomAccess.getFilePointer();
 					int childAtomSize = mRandomAccess.readInt();
 
-
 					byte[] bytes = new byte[Constants.ATOM_LABEL_LEN];
 					mRandomAccess.readFully(bytes);
 
@@ -46,13 +45,12 @@ public class STSD extends Atom {
 					for (int indent = 0; indent < this.level + 1; indent++)
 						printMsg += " -> ";
 
-
 					printMsg += "(" + strChildAtom + ") => " + childAtomSize + " bytes,  Offset: " + fptr + ", Parent: " + Constants.STSD;
 
 					System.out.println(printMsg);
 
 					if (strChildAtom.equals(Constants.AVC1)) {
-						AVC1 avc1 = new AVC1(mRandomAccess, fptr, childAtomSize, Constants.STSD, level);
+						AVC1 avc1 = new AVC1(mRandomAccess, fptr, childAtomSize, Constants.STSD, level + 1);
 						avc1.parse();
 					}
 

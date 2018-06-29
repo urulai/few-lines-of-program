@@ -146,12 +146,12 @@ class ByteParser {
                                 } else
                                     atom.setParent(getParent(strAtom));
 
-                                if (objByteParser.AtomList != null) {
-                                    objByteParser.AtomList.add(atom);
-                                } else {
-                                    objByteParser.AtomList = new ArrayList<Atom>();
-                                    objByteParser.AtomList.add(atom);
-                                }
+                                // if (objByteParser.AtomList != null) {
+                                //     objByteParser.AtomList.add(atom);
+                                // } else {
+                                //     objByteParser.AtomList = new ArrayList<Atom>();
+                                //     objByteParser.AtomList.add(atom);
+                                // }
                             }
 
                             long newOffset;
