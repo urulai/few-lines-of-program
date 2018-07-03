@@ -33,7 +33,7 @@ public class SV3D extends Atom {
 
 				printMsg += "(" + strChildAtom + ") => " + childAtomSize + " bytes,  Offset: " + fptr + ", Parent: " + Constants.SV3D;
 
-				System.out.println(printMsg);
+				//System.out.println(printMsg);
 
 				if (strChildAtom.equals(Constants.SVHD)) {
 

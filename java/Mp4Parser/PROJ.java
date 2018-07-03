@@ -33,7 +33,7 @@ public class PROJ extends Atom {
 
 				printMsg += "(" + strChildAtom + ") => " + childAtomSize + " bytes,  Offset: " + fptr + ", Parent: " + Constants.PROJ;
 
-				System.out.println(printMsg);
+				//System.out.println(printMsg);
 
 				if (strChildAtom.equals(Constants.PRHD)) {
 					PRHD prhd = new PRHD(mRandomAccess, fptr, childAtomSize, Constants.PROJ, level + 1);

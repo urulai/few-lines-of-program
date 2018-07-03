@@ -35,7 +35,7 @@ public class Util {
         try {
             atom_label = new String(bytes, "UTF-8");
         } catch (UnsupportedEncodingException ex) {
-            System.out.println(ex.getMessage());
+            //System.out.println(ex.getMessage());
         } finally {
             return atom_label;
         }
@@ -101,5 +101,22 @@ public class Util {
         default:
             return -1;
         }
+    }
+
+    public static String getParent(String strAtomName) {
+        String id = null;
+
+        if (Constants.childAtomsMOOV != null && Constants.childAtomsMOOV.contains(strAtomName))
+            id = Constants.MOOV;
+        else if (Constants.childAtomsTRAK != null && Constants.childAtomsTRAK.contains(strAtomName))
+            id = Constants.TRAK;
+        else if (Constants.childAtomsMDIA != null && Constants.childAtomsMDIA.contains(strAtomName))
+            id = Constants.MDIA;
+        else if (Constants.childAtomsMINF != null && Constants.childAtomsMINF.contains(strAtomName))
+            id = Constants.MINF;
+        else if (Constants.childAtomsSTBL != null && Constants.childAtomsSTBL.contains(strAtomName))
+            id = Constants.STBL;
+
+        return id;
     }
 }

@@ -49,7 +49,7 @@ public class AVC1 extends Atom {
 			long fptr = mRandomAccess.getFilePointer();
 			long count = fptr - this.startOffset;  // Bytes that has been read
 
-			// System.out.println("Bytes read: " + count + " startoffset: " + this.startOffset +  " end : " + endOffset + ", fptr: " + fptr);
+			//System.out.println("Bytes read: " + count + " startoffset: " + this.startOffset +  " end : " + endOffset + ", fptr: " + fptr);
 
 			do {
 
@@ -65,11 +65,11 @@ public class AVC1 extends Atom {
 
 				printMsg += "(" + strChildAtom + ") => " + childAtomSize + " bytes,  Offset: " + fptr + ", Parent: " + Constants.AVC1;
 
-				System.out.println(printMsg);
+				//System.out.println(printMsg);
 
 				if (strChildAtom.equals(Constants.AVCC) || strChildAtom.equals(Constants.ST3D)
 				    || strChildAtom.equals(Constants.PASP)) {
-					// System.out.println("will parse --> " + strChildAtom);
+					//System.out.println("will parse --> " + strChildAtom);
 				} else if (strChildAtom.equals(Constants.SV3D)) {
 						SV3D sv3d = new SV3D(mRandomAccess, fptr, childAtomSize, Constants.AVC1, level + 1);
 						sv3d.parse();
@@ -81,7 +81,7 @@ public class AVC1 extends Atom {
 
 			mRandomAccess.seek(this.startOffset + this.length);
 		} catch (IOException ex) {
-			System.out.println(ex.getMessage());
+			//System.out.println(ex.getMessage());
 		}
 	}
 }

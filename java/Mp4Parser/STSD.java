@@ -20,14 +20,14 @@ public class STSD extends Atom {
 			long fptr = mRandomAccess.getFilePointer();
 			byte version = mRandomAccess.readByte();
 
-			// System.out.println("Version: " + version);
+			// //System.out.println("Version: " + version);
 
 			//skip flags which is usually set to zero.
 			byte[] flags = new byte[Constants.STSD_FLAGS_LEN];
 			mRandomAccess.readFully(flags);
 
 			int numEntries = mRandomAccess.readInt();
-			// System.out.println("Entries: " + numEntries);
+			// //System.out.println("Entries: " + numEntries);
 
 			// Start reading child elements, if there are any
 			if (numEntries > 0) {
@@ -47,7 +47,7 @@ public class STSD extends Atom {
 
 					printMsg += "(" + strChildAtom + ") => " + childAtomSize + " bytes,  Offset: " + fptr + ", Parent: " + Constants.STSD;
 
-					System.out.println(printMsg);
+					//System.out.println(printMsg);
 
 					if (strChildAtom.equals(Constants.AVC1)) {
 						AVC1 avc1 = new AVC1(mRandomAccess, fptr, childAtomSize, Constants.STSD, level + 1);

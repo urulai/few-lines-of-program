@@ -35,7 +35,7 @@ public class UUID extends Atom {
                 mRandomAccess.readFully(data);
 
                 String str = Util.getString(data);
-                System.out.println(str);
+                //System.out.println(str);
             }
 
             mRandomAccess.seek(startOffset + length);

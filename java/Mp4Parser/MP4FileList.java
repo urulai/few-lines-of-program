@@ -21,7 +21,7 @@ public class MP4FileList {
             paths = f.listFiles();
 
             for (File path : paths) {
-                Pattern pattern = Pattern.compile("[a-zA-Z0-9_-]+.mp4");
+                Pattern pattern = Pattern.compile("[a-zA-Z0-9_-]+.[mp4|MP4]");
                 Matcher matcher = pattern.matcher(path.toString());
 
                 if (matcher != null && matcher.find()) {

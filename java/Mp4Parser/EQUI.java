@@ -34,7 +34,7 @@ public class EQUI extends Atom {
             if (atomList != null)
                 atomList.insert((Atom)this);
             else {
-                System.out.println("empty");
+                //System.out.println("empty");
             }
         } catch (IOException ex) {
             //System.out.println(ex.getMessage());
