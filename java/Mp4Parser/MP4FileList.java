@@ -1,7 +1,5 @@
 import java.io.File;
 import java.util.ArrayList;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
 
 public class MP4FileList {
     private ArrayList<File> listFiles = null;
@@ -21,10 +19,9 @@ public class MP4FileList {
             paths = f.listFiles();
 
             for (File path : paths) {
-                Pattern pattern = Pattern.compile("[a-zA-Z0-9_-]+.[mp4|MP4]");
-                Matcher matcher = pattern.matcher(path.toString());
 
-                if (matcher != null && matcher.find()) {
+                if (path.toString().endsWith("mp4") || path.toString().endsWith("MP4")) {
+
                     if (listFiles == null)
                         listFiles =  new ArrayList<File>();
 

@@ -1,3 +1,6 @@
 This module tries to parse MP4 files.
 
 I took the liberty to name most of the files based on atom name found in Quick Time File Format, since an atom is functionally identical to a box in MPEG-4 as defined in ISO specifications.
+
+Reference:
+https://developer.apple.com/library/archive/documentation/QuickTime/QTFF/QTFFChap2/qtff2.html#//apple_ref/doc/uid/TP40000939-CH204-CJBCAJIB
