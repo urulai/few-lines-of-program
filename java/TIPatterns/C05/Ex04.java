@@ -7,7 +7,7 @@ interface Shape {
 }
 
 abstract class ShapeFactory {
-	static Map<String, ShapeFactory> factories = new HashMap<String, ShapeFactory>();;
+	static Map<String, ShapeFactory> factories = new HashMap<String, ShapeFactory>();
 	abstract Shape create();
 
 	public static void addFactory(String type, ShapeFactory factory) {
@@ -39,10 +39,10 @@ class Circle implements Shape {
 	private static String type = "Circle";
 	private Circle() {}
 	public void draw() {
-		System.out.println("Circle.draw");
+		System.out.print("Circle.draw");
 	}
 	public void erase() {
-		System.out.println("Circle.erase");
+		System.out.print("Circle.erase");
 	}
 
 	static class Factory extends ShapeFactory {
@@ -60,12 +60,11 @@ class Triangle implements Shape {
 	private static String type = "Triangle";
 	private Triangle() {}
 	public void draw() {
-		System.out.println("Triangle.draw");
+		System.out.print("Triangle.draw");
 	}
 	public void erase() {
-		System.out.println("Triangle.erase");
+		System.out.print("Triangle.erase");
 	}
-
 	static class Factory extends ShapeFactory {
 		Shape create() {
 			return new Triangle();
@@ -81,12 +80,11 @@ class Square implements Shape {
 	private static String type = "Square";
 	private Square() {}
 	public void draw() {
-		System.out.println("Square.draw");
+		System.out.print("Square.draw");
 	}
 	public void erase() {
-		System.out.println("Square.erase");
+		System.out.print("Square.erase");
 	}
-
 	static class Factory extends ShapeFactory {
 		Shape create() {
 			return new Square();
@@ -98,32 +96,60 @@ class Square implements Shape {
 	}
 }
 
-abstract class AbstractFactory {
-	abstract void CreateThinShapes(String type);
-	abstract void CreateThickShapes(String type);
-}
 
-class FactoryOfFactory extends AbstractFactory {
+class ShapeWithAttr {
+	private Shape shape;
+	private String variant;
 
-	public void CreateThickShapes(String type) {
-		Shape thickShape = ShapeFactory.getShapeFromFactory(type);
-		System.out.println("Thick ");
-		thickShape.draw();
-		System.out.println("Thick ");
-		thickShape.erase();
+	ShapeWithAttr(String v, Shape s) {
+		variant = v;
+		shape = s;
 	}
 
-	public void CreateThinShapes(String type) {
-		Shape thinShape = ShapeFactory.getShapeFromFactory(type);
-		System.out.println("Thin ");
-		thinShape.draw();
-		System.out.println("Thin ");
-		thinShape.erase();
+	public void draw() {
+		System.out.print(variant + " ");
+		shape.draw();
+		System.out.println();
+	}
+
+	public void erase() {
+		System.out.print(variant + " ");
+		shape.erase();
+		System.out.println();
+	}
+}
+
+class FactoryOfFactory extends ShapeFactory {
+
+	private Shape shape;
+	private static String variant, type;
+
+	public ShapeWithAttr getShapeWithAttrFromFactory(String v, String t) {
+		type = t;
+		variant = v;
+
+		return new ShapeWithAttr(variant, this.create());
+	}
+
+	Shape create() {
+		switch (variant) {
+		default:
+		case "thick":
+		case "thin":
+			shape = ShapeFactory.getShapeFromFactory(type);
+			break;
+		}
+
+		return shape;
 	}
 }
 
 class Ex04 {
 	public static void main(String[] args) {
+		String[] variant = new String[] {
+		    "thick", "thin"
+		};
+
 		String[] types = new String[] {
 		    "Circle",
 		    "Triangle",
@@ -132,11 +158,12 @@ class Ex04 {
 
 		FactoryOfFactory ff = new FactoryOfFactory();
 
-		for (String type :  types) {
-			ff.CreateThickShapes(type);
-
-			ff.CreateThinShapes(type);
-
-	}
+		for (String v : variant) {
+			for (String t : types) {
+				ShapeWithAttr swa = ff.getShapeWithAttrFromFactory(v, t);
+				swa.draw();
+				swa.erase();
+			}
+		}
 	}
 }
